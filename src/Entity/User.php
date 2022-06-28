@@ -3,23 +3,20 @@
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
-use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\ORM\Mapping as ORM;
-use App\Entity\Traits\Timestampable;
-use DateTimeImmutable;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use App\Repository\UserRepository;
+use DateTimeImmutable;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ApiResource]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    /*
-     * Timestampable trait
-     */
-    use Timestampable;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -38,10 +35,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: Article::class)]
     private $User_Articles;
 
+    #[ORM\Column(type: 'datetime_immutable')]
+    private $createdAt;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private $UpdatedAt;
+
+
     public function __construct()
     {
+        $this->createdAt = new DateTimeImmutable();
         $this->User_Articles = new ArrayCollection();
-        $this->createdAt = new DateTimeImmutable;
     }
 
     public function getId(): ?int
@@ -117,11 +121,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @return Collection<int, Article>
      */
-    public function getUserArticles(): ArrayCollection
+    public function getUserArticles(): Collection
     {
         return $this->User_Articles;
     }
 
+    
     public function addUserArticle(Article $userArticle): self
     {
         if (!$this->User_Articles->contains($userArticle)) {
@@ -140,6 +145,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $userArticle->setAuthor(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): self
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->UpdatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeInterface $UpdatedAt): self
+    {
+        $this->UpdatedAt = $UpdatedAt;
 
         return $this;
     }
