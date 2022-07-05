@@ -6,6 +6,7 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 use App\Repository\UserRepository;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\Collection;
@@ -14,7 +15,22 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
-#[ApiResource]
+#[ApiResource(
+    collectionOperations: [
+        'get' => [
+            'normalization_context' => ['groups' => ['read_collections']],
+        ],
+        'post'
+    ],
+    itemOperations: [
+        'get' => [
+            'normalization_context' => ['groups' => ['read_item']],
+        ],
+        'put',
+        'patch',
+        'delete'
+    ],
+)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
 
@@ -24,6 +40,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $id;
 
     #[ORM\Column(type: 'string', length: 180, unique: true)]
+    #[Groups(["read_collections", "read_item"])]
     private $email;
 
     #[ORM\Column(type: 'json')]
@@ -33,12 +50,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $password;
 
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: Article::class)]
+    #[Groups(["read_item"])]
     private $User_Articles;
 
     #[ORM\Column(type: 'datetime_immutable')]
+    #[Groups(["read_collections", "read_item"])]
     private $createdAt;
 
     #[ORM\Column(type: 'datetime', nullable: true)]
+    #[Groups(["read_collections", "read_item"])]
     private $UpdatedAt;
 
 
