@@ -2,15 +2,16 @@
 
 namespace App\Entity;
 
+use Doctrine\ORM\Mapping as ORM;
+use App\Repository\UserRepository;
+use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
-use App\Repository\UserRepository;
-use DateTimeImmutable;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\RangeFilter;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
 
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -31,6 +32,7 @@ use Doctrine\ORM\Mapping as ORM;
         'delete'
     ],
 )]
+#[ApiFilter(RangeFilter::class, properties: ['age'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
 
@@ -61,10 +63,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(["read_collections", "read_item"])]
     private $UpdatedAt;
 
+    #[ORM\Column(type: 'boolean')]
+    private $status;
+
+    #[ORM\Column(type: 'integer')]
+    #[Groups(["read_collections", "read_item"])]
+    private $age;
+
 
     public function __construct()
     {
-        $this->createdAt = new DateTimeImmutable();
+        $this->createdAt = new \DateTimeImmutable();
         $this->User_Articles = new ArrayCollection();
     }
 
@@ -189,6 +198,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUpdatedAt(?\DateTimeInterface $UpdatedAt): self
     {
         $this->UpdatedAt = $UpdatedAt;
+
+        return $this;
+    }
+
+    public function isStatus(): ?bool
+    {
+        return $this->status;
+    }
+
+    public function setStatus(bool $status): self
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function getAge(): ?int
+    {
+        return $this->age;
+    }
+
+    public function setAge(int $age): self
+    {
+        $this->age = $age;
 
         return $this;
     }

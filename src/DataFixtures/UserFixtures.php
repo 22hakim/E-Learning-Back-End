@@ -28,7 +28,9 @@ class UserFixtures extends Fixture
             $passhash = $this->hasher->hashPassword($user, 'password');
 
             $user->setPassword($passhash)
-                ->setEmail($fake->email);
+                ->setEmail($fake->email())
+                ->setStatus($fake->boolean())
+                ->setAge($fake->numberBetween(18, 72));
 
             $manager->persist($user);
 
