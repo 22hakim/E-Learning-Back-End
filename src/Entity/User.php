@@ -9,7 +9,6 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\RangeFilter;
 use Doctrine\Common\Collections\Collection;
 
@@ -33,9 +32,8 @@ use Doctrine\Common\Collections\Collection;
     ],
 )]
 #[ApiFilter(RangeFilter::class, properties: ['age'])]
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+class User implements UserInterface
 {
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
@@ -49,6 +47,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $roles = [];
 
     #[ORM\Column(type: 'string')]
+    #[Groups(["read_collections", "read_item"])]
     private $password;
 
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: Article::class)]
@@ -133,6 +132,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setPassword(string $password): self
     {
+
         $this->password = $password;
 
         return $this;
