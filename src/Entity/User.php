@@ -10,11 +10,14 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Security\Core\User\UserInterface;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\RangeFilter;
+use App\EntityListener\UserListener;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 
-#[ORM\Entity(repositoryClass: UserRepository::class)]
+
 #[ORM\Table(name: '`user`')]
+#[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ApiResource(
     collectionOperations: [
         'get' => [
@@ -30,9 +33,9 @@ use Doctrine\Common\Collections\Collection;
         'patch',
         'delete'
     ],
-)]
+    )]
 #[ApiFilter(RangeFilter::class, properties: ['age'])]
-class User implements UserInterface
+class User implements UserInterface,PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -117,6 +120,9 @@ class User implements UserInterface
 
     public function setRoles(array $roles): self
     {
+        if(count($roles) == 0)
+            $roles[] = 'ROLE_USER';
+
         $this->roles = $roles;
 
         return $this;
@@ -130,9 +136,9 @@ class User implements UserInterface
         return $this->password;
     }
 
+    
     public function setPassword(string $password): self
     {
-
         $this->password = $password;
 
         return $this;
