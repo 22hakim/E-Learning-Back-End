@@ -10,9 +10,9 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Security\Core\User\UserInterface;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\RangeFilter;
-use App\EntityListener\UserListener;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Serializer\Annotation\SerializedName;
 
 
 
@@ -35,6 +35,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
     ],
     )]
 #[ApiFilter(RangeFilter::class, properties: ['age'])]
+
 class User implements UserInterface,PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -49,9 +50,15 @@ class User implements UserInterface,PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'json')]
     private $roles = [];
 
+    /**
+     * @SerializedName("password")
+     */
+    private $plainPassword;
+
     #[ORM\Column(type: 'string')]
     #[Groups(["read_collections", "read_item"])]
-    private $password;
+    private string $password = 'password';
+
 
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: Article::class)]
     #[Groups(["read_item"])]
@@ -120,10 +127,8 @@ class User implements UserInterface,PasswordAuthenticatedUserInterface
 
     public function setRoles(array $roles): self
     {
-        if(count($roles) == 0)
-            $roles[] = 'ROLE_USER';
 
-        $this->roles = $roles;
+        $this->roles = ['ROLE_USER'];
 
         return $this;
     }
@@ -136,13 +141,27 @@ class User implements UserInterface,PasswordAuthenticatedUserInterface
         return $this->password;
     }
 
-    
     public function setPassword(string $password): self
     {
         $this->password = $password;
 
         return $this;
     }
+
+    
+    public function setPlainPassword(string $password): self
+    {
+        $this->plainPassword = $password;
+
+        return $this;
+    }
+
+    public function getPlainPassword(): string
+    {
+        return $this->plainPassword;
+    }
+
+    
 
     /**
      * @see UserInterface

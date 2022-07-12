@@ -5,11 +5,18 @@ namespace App\DataFixtures;
 use Faker\Factory;
 use App\Entity\{User, Article};
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Doctrine\Persistence\ObjectManager;
 
 class AppFixtures extends Fixture
 {
 
+    private $hasher;
+
+    public function __construct( UserPasswordHasherInterface $userPasswordEncoder)
+    {
+        $this->hasher = $userPasswordEncoder;
+    }
     public function load(ObjectManager $manager): void
     {
         $fake = Factory::create();
@@ -17,6 +24,8 @@ class AppFixtures extends Fixture
         for ($i = 0; $i < 4; $i++) {
 
             $user = new User();
+
+            $passhash = $this->hasher->encodePassword($user, $data->getPlainPassword());
 
             $user->setPassword('password')
                 ->setEmail($fake->email())
