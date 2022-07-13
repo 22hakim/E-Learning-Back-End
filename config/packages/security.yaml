@@ -14,10 +14,10 @@ security:
     firewalls:
 
         login:
-            pattern: ^/api/login
+            pattern: ^/api/login_jwt
             stateless: true
             json_login:
-                check_path: /api/login_check
+                check_path: /api/login_jwt
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
                 username_path: email
@@ -25,22 +25,32 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        main:
-            lazy: true
+
+
+        api:
+            pattern: ^/api/
+            stateless: true
             provider: app_user_provider
-
-
-        users:
-            pattern:   ^/api/users
-            methods: [PUT,PATCH,DELETE]
-            stateless: true
             jwt: ~
+        main:
+            json_login:
+                check_path: /authentication_token
+                username_path: email
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
 
-        articles:
-            pattern:   ^/api/artciles
-            methods: [POST,PUT,PATCH,DELETE]
-            stateless: true
-            jwt: ~
+
+        # users:
+        #     pattern:   ^/api/users
+        #     methods: [PUT,PATCH,DELETE]
+        #     stateless: true
+        #     jwt: ~
+
+        # articles:
+        #     pattern:   ^/api/artciles
+        #     methods: [POST,PUT,PATCH,DELETE]
+        #     stateless: true
+        #     jwt: ~
 
             # https://symfony.com/doc/current/security/impersonating_user.html
             # switch_user: true
@@ -48,10 +58,11 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/api/users, roles: PUBLIC_ACCESS }
-        - { path: ^/api/login, roles: PUBLIC_ACCESS }
-        - { path: ^/api/users, roles: IS_AUTHENTICATED_FULLY ,methods: [PUT,PATCH,DELETE]}
-        - { path: ^/api/articles, roles: IS_AUTHENTICATED_FULLY ,methods: [POST,PUT,PATCH,DELETE]}
+        - { path: ^/api/users, roles: PUBLIC_ACCESS, methods: ['GET']}
+        - { path: ^/authentication_token, roles: PUBLIC_ACCESS }
+        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+        # - { path: ^/api/users, roles: IS_AUTHENTICATED_FULLY }
+        # - { path: ^/api/articles, roles: IS_AUTHENTICATED_FULLY ,methods: [POST,PUT,PATCH,DELETE]}
 
 when@test:
     security:
